@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, X, MapPin, Calendar, MessageSquare, UserPlus } from "lucide-react";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,81 +14,108 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { href: "#home", label: "Home" },
     { href: "#about", label: "About" },
     { href: "#services", label: "Services" },
     { href: "#portfolio", label: "Portfolio" },
-    { href: "#contact", label: "Contact" },
+  ];
+
+  const utilityLinks = [
+    { href: "#portfolio", label: "Projects", icon: MapPin },
+    { href: "#services", label: "Services", icon: Calendar },
+    { href: "#contact", label: "Contact", icon: MessageSquare },
+    { href: "#contact", label: "Join Us", icon: UserPlus },
   ];
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled ? "glass py-4" : "bg-transparent py-6"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? "glass border-b border-border/50" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-6 flex items-center justify-between">
-        <a href="#home" className="flex items-center space-x-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center glow">
-            <span className="text-xl font-bold text-background">N</span>
-          </div>
-          <span className="text-xl font-bold gradient-text">Nextup Studio</span>
-        </a>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
+      <div className="container mx-auto px-6">
+        {/* Top utility bar */}
+        <div className="hidden lg:flex items-center justify-end gap-8 py-3 border-b border-border/30">
+          {utilityLinks.map((link) => (
             <a
-              key={link.href}
+              key={link.label}
               href={link.href}
-              className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              {link.label}
+              <link.icon size={16} />
+              <span>{link.label}</span>
             </a>
           ))}
         </div>
 
-        {/* CTA Button */}
-        <div className="hidden md:block">
-          <Button
-            className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity duration-300 glow"
-            asChild
-          >
-            <a href="#contact">Get Started</a>
-          </Button>
-        </div>
+        {/* Main navigation */}
+        <div className="flex items-center justify-between py-6">
+          <a href="#home" className="flex items-center space-x-3 group">
+            <div className="text-2xl font-bold tracking-tighter">
+              <span className="text-foreground">NEXTUP</span>
+              <div className="text-xs text-muted-foreground tracking-widest">STUDIO</div>
+            </div>
+          </a>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden text-foreground"
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-12">
+            <a href="#home" className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide">
+              Home
+            </a>
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden text-foreground"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden glass mt-4 mx-4 rounded-2xl overflow-hidden animate-fade-in">
-          <div className="flex flex-col space-y-4 p-6">
+        <div className="md:hidden glass border-t border-border/50 animate-fade-in">
+          <div className="container mx-auto px-6 py-6 flex flex-col space-y-4">
+            <a
+              href="#home"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-foreground hover:text-muted-foreground transition-colors py-2"
+            >
+              Home
+            </a>
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-muted-foreground hover:text-primary transition-colors duration-300 font-medium"
+                className="text-foreground hover:text-muted-foreground transition-colors py-2"
               >
                 {link.label}
               </a>
             ))}
-            <Button
-              className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 w-full"
-              asChild
-            >
-              <a href="#contact" onClick={() => setIsMobileMenuOpen(false)}>
-                Get Started
-              </a>
-            </Button>
+            <div className="pt-4 space-y-2">
+              {utilityLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors py-2"
+                >
+                  <link.icon size={16} />
+                  <span>{link.label}</span>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       )}
