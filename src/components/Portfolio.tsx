@@ -1,6 +1,10 @@
 import { ExternalLink, Youtube } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import fireWithinImg from "@/assets/fire-within.jpg";
+import raatKaBandaImg from "@/assets/raat-ka-banda.jpg";
+import creativeEditsImg from "@/assets/creative-edits.jpg";
+import minecraftProjectsImg from "@/assets/minecraft-projects.jpg";
 
 const Portfolio = () => {
   const projects = [
@@ -8,29 +12,29 @@ const Portfolio = () => {
       title: "Fire Within",
       category: "Music Production",
       description: "Original rap track with powerful visuals and impactful storytelling",
-      link: "https://www.youtube.com/@nextupstudioyt",
-      color: "from-red-500 to-orange-500",
+      link: "https://youtu.be/_W0IXb5jjZs?si=RH3dD39zGTX9naR7",
+      image: fireWithinImg,
     },
     {
       title: "Raat Ka Banda",
       category: "Music Video",
       description: "Lo-fi beats with raw, authentic lyrics and cinematic editing",
-      link: "https://www.youtube.com/@nextupstudioyt",
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      title: "Minecraft Projects",
-      category: "Gaming Content",
-      description: "Creative builds and interactive gaming experiences",
-      link: "https://www.youtube.com/@nextupstudioyt",
-      color: "from-green-500 to-emerald-500",
+      link: "https://youtu.be/xftcj39h-QY?si=MOcYT5nEyL2eqmO3",
+      image: raatKaBandaImg,
     },
     {
       title: "Creative Edits",
       category: "Video Editing",
       description: "Professional post-production for various content creators",
-      link: "https://www.youtube.com/@nextupstudioyt",
-      color: "from-blue-500 to-cyan-500",
+      link: "https://nextup-hub.vercel.app/",
+      image: creativeEditsImg,
+    },
+    {
+      title: "Minecraft Projects",
+      category: "Gaming Content",
+      description: "Creative builds and interactive gaming experiences",
+      link: "https://nextup-hub-mc.vercel.app/",
+      image: minecraftProjectsImg,
     },
   ];
 
@@ -56,7 +60,12 @@ const Portfolio = () => {
               className="glass border-primary/20 overflow-hidden depth-card group animate-scale-in"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
-              <div className={`h-48 bg-gradient-to-br ${project.color} relative overflow-hidden`}>
+              <div className="h-48 relative overflow-hidden">
+                <img 
+                  src={project.image} 
+                  alt={project.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
                 <div className="absolute bottom-4 left-4 right-4">
                   <span className="inline-block px-3 py-1 glass rounded-full text-xs font-medium mb-2">
