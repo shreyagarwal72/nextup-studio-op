@@ -4,7 +4,7 @@ A premium, professional business website for Nextup Studio, showcasing creative 
 
 ## 🌟 Live Website
 
-**[View Live Demo](https://lovable.dev/projects/19d1f869-1040-4ac5-a13c-cdb2913fd23f)**
+**[View Live Website](https://nextup-studio.vercel.app)**
 
 ## 🎨 About Nextup Studio
 
