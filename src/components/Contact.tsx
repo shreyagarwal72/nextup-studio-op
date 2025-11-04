@@ -81,20 +81,20 @@ const Contact = () => {
     <section id="contact" className="py-24 relative">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 animate-fade-in">
-          <div className="inline-block px-6 py-2 glass rounded-full mb-4">
+          <div className="inline-block px-6 py-3 glass rounded-full mb-6 hover-scale transition-all duration-300">
             <span className="text-sm font-medium gradient-text">Get In Touch</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 animate-scale-in">
             Let's Create <span className="gradient-text">Together</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Have a project in mind? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
-          <div className="glass rounded-3xl p-8 depth-card animate-slide-in">
+          <div className="glass rounded-3xl p-8 depth-card animate-slide-in hover-scale transition-all duration-300">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Input
@@ -103,7 +103,7 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="glass border-primary/30 focus:border-primary"
+                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-6"
                 />
               </div>
               <div>
@@ -114,7 +114,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="glass border-primary/30 focus:border-primary"
+                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-6"
                 />
               </div>
               <div>
@@ -124,7 +124,7 @@ const Contact = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  className="glass border-primary/30 focus:border-primary"
+                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-6"
                 />
               </div>
               <div>
@@ -135,16 +135,16 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   rows={6}
-                  className="glass border-primary/30 focus:border-primary resize-none"
+                  className="glass border-primary/30 focus:border-primary resize-none transition-all duration-300"
                 />
               </div>
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 glow group"
+                className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover-scale glow group transition-all duration-300 py-6"
               >
                 Send Message
-                <Send className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </form>
           </div>
@@ -157,15 +157,15 @@ const Contact = () => {
                 href={item.href}
                 target={item.label === "Location" ? "_blank" : undefined}
                 rel={item.label === "Location" ? "noopener noreferrer" : undefined}
-                className="glass rounded-2xl p-6 flex items-start gap-4 depth-card group"
-                style={{ animationDelay: `${0.1 * index}s` }}
+                className="glass rounded-2xl p-6 flex items-start gap-4 depth-card group hover-scale transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: `${0.1 * index + 0.2}s` }}
               >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center glow group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center glow group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                   <item.icon className="w-6 h-6 text-background" />
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">{item.label}</div>
-                  <div className="font-medium group-hover:text-primary transition-colors">
+                  <div className="font-medium group-hover:gradient-text transition-all duration-300">
                     {item.value}
                   </div>
                 </div>
@@ -173,7 +173,7 @@ const Contact = () => {
             ))}
 
             {/* Social Links */}
-            <div className="glass rounded-2xl p-6">
+            <div className="glass rounded-2xl p-6 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: "0.5s" }}>
               <h3 className="font-bold mb-4">Follow Us</h3>
               <div className="flex gap-4">
                 {socialLinks.map((social) => (
@@ -182,7 +182,7 @@ const Contact = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-xl glass border-primary/30 hover:border-primary flex items-center justify-center group transition-all duration-300 hover:glow"
+                    className="w-12 h-12 rounded-xl glass border-primary/30 hover:border-primary flex items-center justify-center group transition-all duration-300 hover:glow hover-scale"
                     aria-label={social.label}
                   >
                     <social.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />

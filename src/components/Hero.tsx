@@ -48,10 +48,10 @@ const Hero = () => {
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-scale-in" style={{ animationDelay: "0.2s" }}>
           <Button
             size="lg"
-            className="min-w-[200px]"
+            className="min-w-[200px] bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover-scale transition-all duration-300 glow"
             asChild
           >
             <a href="#contact">Join Us</a>
@@ -60,7 +60,7 @@ const Hero = () => {
           <Button
             size="lg"
             variant="outline"
-            className="min-w-[200px]"
+            className="min-w-[200px] glass border-primary/30 hover:bg-primary/10 hover-scale transition-all duration-300"
             asChild
           >
             <a href="#portfolio">Explore Projects</a>
@@ -77,10 +77,10 @@ const Hero = () => {
           ].map((stat, index) => (
             <div
               key={stat.label}
-              className="text-center animate-fade-in"
+              className="text-center animate-fade-in glass rounded-2xl p-6 hover-scale transition-all duration-300 cursor-default"
               style={{ animationDelay: `${index * 0.1 + 0.3}s` }}
             >
-              <div className="text-4xl md:text-5xl font-bold text-foreground mb-2">
+              <div className="text-4xl md:text-5xl font-bold gradient-text mb-2">
                 {stat.value}
               </div>
               <div className="text-sm text-muted-foreground uppercase tracking-wide">{stat.label}</div>

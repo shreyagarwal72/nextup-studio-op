@@ -39,13 +39,13 @@ const Services = () => {
     <section id="services" className="py-24 relative">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 animate-fade-in">
-          <div className="inline-block px-6 py-2 glass rounded-full mb-4">
+          <div className="inline-block px-6 py-3 glass rounded-full mb-6 hover-scale transition-all duration-300">
             <span className="text-sm font-medium gradient-text">What We Offer</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 animate-scale-in">
             Our <span className="gradient-text">Services</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Comprehensive creative solutions tailored to your unique vision and goals
           </p>
         </div>
@@ -54,14 +54,14 @@ const Services = () => {
           {services.map((service, index) => (
             <Card
               key={service.title}
-              className="glass border-primary/20 depth-card group animate-scale-in"
+              className="glass border-primary/20 depth-card group animate-scale-in hover-scale transition-all duration-300"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="p-8">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6 glow group-hover:scale-110 transition-transform duration-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6 glow group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                   <service.icon className="w-7 h-7 text-background" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+                <h3 className="text-xl font-bold mb-3 group-hover:gradient-text transition-all duration-300">
                   {service.title}
                 </h3>
                 <p className="text-muted-foreground leading-relaxed">

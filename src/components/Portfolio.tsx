@@ -1,7 +1,7 @@
 import { ExternalLink, Youtube } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import fireWithinImg from "@/assets/fire-within.jpg";
+import nightOfShadowsImg from "@/assets/night-of-shadows.jpg";
 import raatKaBandaImg from "@/assets/raat-ka-banda.jpg";
 import creativeEditsImg from "@/assets/creative-edits.jpg";
 import minecraftProjectsImg from "@/assets/minecraft-projects.jpg";
@@ -13,7 +13,7 @@ const Portfolio = () => {
       category: "Music Production",
       description: "A chilling Halloween rap track with haunting visuals and atmospheric storytelling",
       link: "https://youtu.be/koZVuRfa_Gc?si=iuAnVIQBgHvqY3Wk",
-      image: fireWithinImg,
+      image: nightOfShadowsImg,
     },
     {
       title: "Raat Ka Banda",
@@ -57,7 +57,7 @@ const Portfolio = () => {
           {projects.map((project, index) => (
             <Card
               key={project.title}
-              className="glass border-primary/20 overflow-hidden depth-card group animate-scale-in"
+              className="glass border-primary/20 overflow-hidden depth-card group animate-scale-in hover-scale transition-all duration-300"
               style={{ animationDelay: `${index * 0.15}s` }}
             >
               <div className="h-48 relative overflow-hidden">
@@ -68,19 +68,19 @@ const Portfolio = () => {
                 />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <span className="inline-block px-3 py-1 glass rounded-full text-xs font-medium mb-2">
+                  <span className="inline-block px-3 py-1 glass rounded-full text-xs font-medium mb-2 animate-fade-in">
                     {project.category}
                   </span>
                 </div>
               </div>
               <CardContent className="p-6">
-                <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                <h3 className="text-2xl font-bold mb-3 group-hover:gradient-text transition-all duration-300">
                   {project.title}
                 </h3>
-                <p className="text-muted-foreground mb-6">{project.description}</p>
+                <p className="text-muted-foreground mb-6 leading-relaxed">{project.description}</p>
                 <Button
                   variant="outline"
-                  className="glass border-primary/50 hover:bg-primary/10 w-full group/btn"
+                  className="glass border-primary/50 hover:bg-primary/10 hover-scale w-full group/btn transition-all duration-300"
                   asChild
                 >
                   <a href={project.link} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
@@ -93,10 +93,10 @@ const Portfolio = () => {
           ))}
         </div>
 
-        <div className="text-center">
+        <div className="text-center animate-scale-in" style={{ animationDelay: "0.6s" }}>
           <Button
             size="lg"
-            className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 glow"
+            className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover-scale glow transition-all duration-300"
             asChild
           >
             <a href="https://www.youtube.com/@nextupstudioyt" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
