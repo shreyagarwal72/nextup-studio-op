@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Menu, X, MapPin, Calendar, MessageSquare, UserPlus } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isAIPage = location.pathname === "/ai";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,18 +61,33 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-12">
-            <a href="#home" className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide">
-              Home
-            </a>
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide"
-              >
-                {link.label}
-              </a>
-            ))}
+            {!isAIPage && (
+              <>
+                <a href="#home" className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide">
+                  Home
+                </a>
+                {navLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </>
+            )}
+            {isAIPage && (
+              <Link to="/" className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide">
+                Home
+              </Link>
+            )}
+            <Link 
+              to="/ai" 
+              className={`text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide ${isAIPage ? 'gradient-text font-medium' : ''}`}
+            >
+              AI Assistant
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -86,36 +104,58 @@ const Navigation = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden glass border-t border-border/50 animate-fade-in">
           <div className="container mx-auto px-6 py-6 flex flex-col space-y-4">
-            <a
-              href="#home"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-foreground hover:text-muted-foreground transition-colors py-2"
-            >
-              Home
-            </a>
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
+            {!isAIPage && (
+              <>
+                <a
+                  href="#home"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-foreground hover:text-muted-foreground transition-colors py-2"
+                >
+                  Home
+                </a>
+                {navLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-foreground hover:text-muted-foreground transition-colors py-2"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </>
+            )}
+            {isAIPage && (
+              <Link 
+                to="/" 
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-foreground hover:text-muted-foreground transition-colors py-2"
               >
-                {link.label}
-              </a>
-            ))}
-            <div className="pt-4 space-y-2">
-              {utilityLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors py-2"
-                >
-                  <link.icon size={16} />
-                  <span>{link.label}</span>
-                </a>
-              ))}
-            </div>
+                Home
+              </Link>
+            )}
+            <Link
+              to="/ai"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`text-foreground hover:text-muted-foreground transition-colors py-2 ${isAIPage ? 'gradient-text font-medium' : ''}`}
+            >
+              AI Assistant
+            </Link>
+            {!isAIPage && (
+              <div className="pt-4 space-y-2">
+                {utilityLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors py-2"
+                  >
+                    <link.icon size={16} />
+                    <span>{link.label}</span>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -9,10 +9,10 @@ import minecraftProjectsImg from "@/assets/minecraft-projects.jpg";
 const Portfolio = () => {
   const projects = [
     {
-      title: "Fire Within",
+      title: "The Night of Shadows",
       category: "Music Production",
-      description: "Original rap track with powerful visuals and impactful storytelling",
-      link: "https://youtu.be/_W0IXb5jjZs?si=RH3dD39zGTX9naR7",
+      description: "A chilling Halloween rap track with haunting visuals and atmospheric storytelling",
+      link: "https://youtu.be/koZVuRfa_Gc?si=iuAnVIQBgHvqY3Wk",
       image: fireWithinImg,
     },
     {
