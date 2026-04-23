@@ -26,7 +26,7 @@ const Index = () => {
                 Vanshu Agarwal is a passionate creative professional specializing in video editing, music production, and digital content creation. With a unique blend of technical expertise and artistic vision, Nextup Studio transforms ideas into engaging digital experiences.
               </p>
               <p>
-                As a Class 11 PCM Science student, Vanshu balances academics with creative pursuits, demonstrating dedication to both intellectual growth and artistic expression. His work spans multiple disciplines including post-production workflows for gaming content, original music production, and innovative Minecraft projects.
+                As a Class 12 PCM Science student, Vanshu balances academics with creative pursuits, demonstrating dedication to both intellectual growth and artistic expression. His work spans multiple disciplines including post-production workflows for gaming content, original music production, and innovative Minecraft projects.
               </p>
               <p>
                 Whether it's crafting powerful rap tracks like "Fire Within" and "Raat Ka Banda," creating immersive gaming content, or delivering professional video editing services, Nextup Studio combines creativity with technology to produce exceptional results.
