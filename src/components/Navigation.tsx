@@ -35,7 +35,7 @@ const Navigation = () => {
         isScrolled ? "glass border-b border-border/50" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Top utility bar */}
         <div className="hidden lg:flex items-center justify-end gap-8 py-3 border-b border-border/30">
           {utilityLinks.map((link) => (
@@ -51,16 +51,16 @@ const Navigation = () => {
         </div>
 
         {/* Main navigation */}
-        <div className="flex items-center justify-between py-6">
+        <div className="flex items-center justify-between py-4 sm:py-6">
           <a href="#home" className="flex items-center space-x-3 group">
-            <div className="text-2xl font-bold tracking-tighter">
+            <div className="text-xl sm:text-2xl font-bold tracking-tighter">
               <span className="text-foreground">NEXTUP</span>
-              <div className="text-xs text-muted-foreground tracking-widest">STUDIO</div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground tracking-widest">STUDIO</div>
             </div>
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-12">
+          <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
             {!isAIPage && (
               <>
                 <a href="#home" className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide">
@@ -93,7 +93,8 @@ const Navigation = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-foreground"
+            className="md:hidden text-foreground p-2 rounded-lg hover:bg-white/5 transition-colors"
+            aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -102,14 +103,14 @@ const Navigation = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden glass border-t border-border/50 animate-fade-in">
+        <div className="md:hidden glass border-t border-border/50 animate-fade-in fixed inset-x-0 top-full max-h-[calc(100vh-80px)] overflow-y-auto shadow-2xl backdrop-blur-2xl bg-background/95">
           <div className="container mx-auto px-6 py-6 flex flex-col space-y-4">
             {!isAIPage && (
               <>
                 <a
                   href="#home"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-foreground hover:text-muted-foreground transition-colors py-2"
+                  className="text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium"
                 >
                   Home
                 </a>
@@ -118,7 +119,7 @@ const Navigation = () => {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-foreground hover:text-muted-foreground transition-colors py-2"
+                    className="text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium"
                   >
                     {link.label}
                   </a>
@@ -129,7 +130,7 @@ const Navigation = () => {
               <Link 
                 to="/" 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-foreground hover:text-muted-foreground transition-colors py-2"
+                className="text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium"
               >
                 Home
               </Link>
@@ -137,20 +138,20 @@ const Navigation = () => {
             <Link
               to="/ai"
               onClick={() => setIsMobileMenuOpen(false)}
-              className={`text-foreground hover:text-muted-foreground transition-colors py-2 ${isAIPage ? 'gradient-text font-medium' : ''}`}
+              className={`text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium ${isAIPage ? 'gradient-text font-semibold' : ''}`}
             >
               AI Assistant
             </Link>
             {!isAIPage && (
-              <div className="pt-4 space-y-2">
+              <div className="pt-4 border-t border-border/30 space-y-2">
                 {utilityLinks.map((link) => (
                   <a
                     key={link.label}
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors py-2"
+                    className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors py-2 text-sm"
                   >
-                    <link.icon size={16} />
+                    <link.icon size={18} />
                     <span>{link.label}</span>
                   </a>
                 ))}
