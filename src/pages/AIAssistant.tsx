@@ -146,6 +146,29 @@ const AIAssistant = () => {
     });
   };
 
+  const renderFormattedContent = (content: string) => {
+    const lines = content.split("\n");
+    return lines.map((line, lineIdx) => {
+      const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+      return (
+        <span key={lineIdx}>
+          {parts.map((part, index) => {
+            if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("*") && part.endsWith("*"))) {
+              const cleanText = part.replace(/^\*+|\*+$/g, "");
+              return (
+                <strong key={index} className="font-bold text-foreground">
+                  {cleanText}
+                </strong>
+              );
+            }
+            return part;
+          })}
+          {lineIdx < lines.length - 1 && <br />}
+        </span>
+      );
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
@@ -211,8 +234,8 @@ const AIAssistant = () => {
                           : "glass border border-primary/30"
                       }`}
                     >
-                      <p className={`text-xs sm:text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "assistant" ? "font-medium sm:font-semibold" : ""}`}>
-                        {msg.content}
+                      <p className={`text-xs sm:text-sm leading-relaxed ${msg.role === "assistant" ? "font-normal" : ""}`}>
+                        {renderFormattedContent(msg.content)}
                       </p>
                     </div>
                   </div>
