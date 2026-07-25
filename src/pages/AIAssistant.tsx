@@ -150,54 +150,54 @@ const AIAssistant = () => {
     <div className="min-h-screen flex flex-col">
       <Navigation />
       
-      <main className="flex-1 container mx-auto px-6 py-24">
+      <main className="flex-1 container mx-auto px-4 sm:px-6 py-20 sm:py-24">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-6 py-3 glass rounded-full mb-6 hover-scale">
-              <Bot className="w-5 h-5 text-primary animate-pulse" />
-              <span className="text-sm font-medium gradient-text">AI Assistant</span>
+          <div className="text-center mb-8 sm:mb-12 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 glass rounded-full mb-4 sm:mb-6 hover-scale">
+              <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-pulse" />
+              <span className="text-xs sm:text-sm font-medium gradient-text">AI Assistant</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-scale-in">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 animate-scale-in">
               Nextup Studio <span className="gradient-text">AI</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Hi! I'm your AI assistant. I can help you learn about Nextup Studio's work, skills, and projects. What would you like to know?
             </p>
           </div>
 
           {messages.length === 0 && (
-            <div className="mb-8 animate-fade-in">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-4 tracking-wide">Suggested Questions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="mb-6 sm:mb-8 animate-fade-in">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-3 sm:mb-4 tracking-wide">Suggested Questions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
                 {suggestedQuestions.map((question, i) => (
                   <Button
                     key={i}
                     variant="outline"
-                    className="glass border-primary/20 hover:bg-primary/10 hover-scale justify-start text-left h-auto py-4 px-5 transition-all duration-300"
+                    className="glass border-primary/20 hover:bg-primary/10 hover-scale justify-start text-left h-auto py-3 sm:py-4 px-4 sm:px-5 transition-all duration-300"
                     onClick={() => handleSuggestedQuestion(question)}
                     style={{ animationDelay: `${i * 0.1}s` }}
                   >
-                    <span className="text-sm">{question}</span>
+                    <span className="text-xs sm:text-sm">{question}</span>
                   </Button>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="relative mb-6">
+          <div className="relative mb-4 sm:mb-6">
             {messages.length > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearChat}
-                className="absolute -top-12 right-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
+                className="absolute -top-10 sm:-top-12 right-0 text-xs sm:text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className="w-4 h-4 mr-1 sm:mr-2" />
                 Clear Chat
               </Button>
             )}
-            <Card className="glass border-primary/20 p-6 min-h-[400px] max-h-[600px] overflow-y-auto backdrop-blur-xl">
-              <div className="space-y-6">
+            <Card className="glass border-primary/20 p-4 sm:p-6 min-h-[350px] sm:min-h-[400px] max-h-[500px] sm:max-h-[600px] overflow-y-auto backdrop-blur-xl">
+              <div className="space-y-4 sm:space-y-6">
                 {messages.map((msg, i) => (
                   <div
                     key={i}
@@ -205,13 +205,13 @@ const AIAssistant = () => {
                     style={{ animationDelay: `${i * 0.05}s` }}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl px-5 py-4 shadow-lg transition-all duration-300 hover:shadow-xl ${
+                      className={`max-w-[90%] sm:max-w-[85%] rounded-2xl px-4 sm:px-5 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl ${
                         msg.role === "user"
                           ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground"
                           : "glass border border-primary/30"
                       }`}
                     >
-                      <p className={`text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "assistant" ? "font-semibold" : ""}`}>
+                      <p className={`text-xs sm:text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "assistant" ? "font-medium sm:font-semibold" : ""}`}>
                         {msg.content}
                       </p>
                     </div>
@@ -219,8 +219,8 @@ const AIAssistant = () => {
                 ))}
                 {isLoading && (
                   <div className="flex justify-start animate-scale-in">
-                    <div className="glass border border-primary/30 rounded-2xl px-5 py-4">
-                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    <div className="glass border border-primary/30 rounded-2xl px-4 sm:px-5 py-3 sm:py-4">
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-primary" />
                     </div>
                   </div>
                 )}
@@ -229,21 +229,21 @@ const AIAssistant = () => {
             </Card>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask me anything about Nextup Studio..."
-              className="glass border-primary/30 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 py-6"
+              placeholder="Ask me anything..."
+              className="glass border-primary/30 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 py-5 sm:py-6 text-xs sm:text-sm"
               disabled={isLoading}
             />
             <Button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover-scale px-6 py-6 transition-all duration-300"
+              className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover-scale px-4 sm:px-6 py-5 sm:py-6 transition-all duration-300 shrink-0"
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              {isLoading ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Send className="w-4 h-4 sm:w-5 sm:h-5" />}
             </Button>
           </div>
 
