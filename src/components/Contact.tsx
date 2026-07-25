@@ -78,24 +78,24 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contact" className="py-24 relative">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16 animate-fade-in">
-          <div className="inline-block px-6 py-3 glass rounded-full mb-6 hover-scale transition-all duration-300">
-            <span className="text-sm font-medium gradient-text">Get In Touch</span>
+    <section id="contact" className="py-12 sm:py-24 relative">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-10 sm:mb-16 animate-fade-in">
+          <div className="inline-block px-4 sm:px-6 py-2 sm:py-3 glass rounded-full mb-4 sm:mb-6 hover-scale transition-all duration-300">
+            <span className="text-xs sm:text-sm font-medium gradient-text">Get In Touch</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 animate-scale-in">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 animate-scale-in">
             Let's Create <span className="gradient-text">Together</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Have a project in mind? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
-          <div className="glass rounded-3xl p-8 depth-card animate-slide-in hover-scale transition-all duration-300">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="glass rounded-2xl sm:rounded-3xl p-5 sm:p-8 depth-card animate-slide-in hover-scale transition-all duration-300">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div>
                 <Input
                   name="name"
@@ -103,7 +103,7 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-6"
+                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-5 sm:py-6 text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -114,7 +114,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-6"
+                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-5 sm:py-6 text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -124,7 +124,7 @@ const Contact = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-6"
+                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-5 sm:py-6 text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -134,8 +134,8 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   required
-                  rows={6}
-                  className="glass border-primary/30 focus:border-primary resize-none transition-all duration-300"
+                  rows={5}
+                  className="glass border-primary/30 focus:border-primary resize-none transition-all duration-300 text-sm sm:text-base"
                 />
               </div>
               <Button
@@ -150,22 +150,22 @@ const Contact = () => {
           </div>
 
           {/* Contact Info */}
-          <div className="space-y-8 animate-slide-in" style={{ animationDelay: "0.2s" }}>
+          <div className="space-y-4 sm:space-y-8 animate-slide-in" style={{ animationDelay: "0.2s" }}>
             {contactInfo.map((item, index) => (
               <a
                 key={item.label}
                 href={item.href}
                 target={item.label === "Location" ? "_blank" : undefined}
                 rel={item.label === "Location" ? "noopener noreferrer" : undefined}
-                className="glass rounded-2xl p-6 flex items-start gap-4 depth-card group hover-scale transition-all duration-300 animate-fade-in"
+                className="glass rounded-xl sm:rounded-2xl p-4 sm:p-6 flex items-start gap-4 depth-card group hover-scale transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: `${0.1 * index + 0.2}s` }}
               >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center glow group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                  <item.icon className="w-6 h-6 text-background" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center glow group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                  <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-background" />
                 </div>
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">{item.label}</div>
-                  <div className="font-medium group-hover:gradient-text transition-all duration-300">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs sm:text-sm text-muted-foreground mb-1">{item.label}</div>
+                  <div className="text-sm sm:text-base font-medium break-all group-hover:gradient-text transition-all duration-300">
                     {item.value}
                   </div>
                 </div>
@@ -173,19 +173,19 @@ const Contact = () => {
             ))}
 
             {/* Social Links */}
-            <div className="glass rounded-2xl p-6 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: "0.5s" }}>
-              <h3 className="font-bold mb-4">Follow Us</h3>
-              <div className="flex gap-4">
+            <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-6 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: "0.5s" }}>
+              <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Follow Us</h3>
+              <div className="flex gap-3 sm:gap-4">
                 {socialLinks.map((social) => (
                   <a
                     key={social.label}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-xl glass border-primary/30 hover:border-primary flex items-center justify-center group transition-all duration-300 hover:glow hover-scale"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl glass border-primary/30 hover:border-primary flex items-center justify-center group transition-all duration-300 hover:glow hover-scale"
                     aria-label={social.label}
                   >
-                    <social.icon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    <social.icon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
                   </a>
                 ))}
               </div>
