@@ -16,16 +16,28 @@ const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>("");
+  const [progress, setProgress] = useState(0);
 
-  // Background once the page scrolls.
+  // Background state and page scroll progress
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 12);
+          const total = document.documentElement.scrollHeight - window.innerHeight;
+          setProgress(total > 0 ? Math.min(1, Math.max(0, window.scrollY / total)) : 0);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Highlight the section currently under the nav (home page only).
+  // Highlight the section currently under the nav (home page only)
   useEffect(() => {
     if (!isHome) {
       setActive("");
@@ -35,7 +47,12 @@ const Navigation = () => {
       let current = "";
       for (const { id } of sectionLinks) {
         const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 140) current = id;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 200 && rect.bottom > 100) {
+            current = id;
+          }
+        }
       }
       setActive(current);
     };
@@ -44,7 +61,7 @@ const Navigation = () => {
     return () => window.removeEventListener("scroll", update);
   }, [isHome]);
 
-  // Close the mobile menu on navigation, Escape, or when growing to desktop width.
+  // Close mobile menu on route change, Escape key, or desktop breakpoint
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
     if (!open) return;
@@ -62,90 +79,108 @@ const Navigation = () => {
     };
   }, [open]);
 
-  const linkBase =
-    "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground aria-[current]:text-foreground";
-
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ${
-        scrolled || open
-          ? "border-b border-border bg-background/90 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-200 ${
+        scrolled
+          ? "border-b border-border/70 bg-background/90 backdrop-blur-md"
+          : "border-b border-transparent bg-background/30 backdrop-blur-xs"
       }`}
     >
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
-      >
-        Skip to content
-      </a>
-
       <div className="wrap flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-baseline gap-2" aria-label="Nextup Studio home">
-          <span className="font-display text-xl font-extrabold tracking-tight">Nextup</span>
-          <span className="font-display text-xl font-medium tracking-tight text-muted-foreground">Studio</span>
+        <Link
+          to="/"
+          className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight focus-visible:outline-offset-4"
+          aria-label="Nextup Studio — Home"
+        >
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-signal" aria-hidden="true" />
+          <span>
+            Nextup <span className="font-medium text-muted-foreground">Studio</span>
+          </span>
         </Link>
 
+        {/* Desktop nav */}
         <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
-          {sectionLinks.map((l) => (
+          {sectionLinks.map((s) => (
             <Link
-              key={l.id}
-              to={{ pathname: "/", hash: `#${l.id}` }}
-              aria-current={isHome && active === l.id ? "location" : undefined}
-              className={linkBase}
+              key={s.id}
+              to={{ pathname: "/", hash: `#${s.id}` }}
+              className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                active === s.id
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
             >
-              {l.label}
-            </Link>
-          ))}
-          <Link to="/ai" aria-current={pathname === "/ai" ? "page" : undefined} className={linkBase}>
-            AI Assistant
-          </Link>
-          <Button asChild size="sm" className="ml-3">
-            <Link to={{ pathname: "/", hash: "#contact" }}>Start a project</Link>
-          </Button>
-        </nav>
-
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-accent md:hidden"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-
-      {open && (
-        <nav
-          id="mobile-menu"
-          aria-label="Mobile"
-          className="wrap flex max-h-[calc(100svh-4rem)] flex-col gap-1 overflow-y-auto pb-6 pt-2 md:hidden"
-        >
-          {sectionLinks.map((l) => (
-            <Link
-              key={l.id}
-              to={{ pathname: "/", hash: `#${l.id}` }}
-              onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-3 font-display text-2xl font-semibold tracking-tight hover:bg-accent"
-            >
-              {l.label}
+              {s.label}
             </Link>
           ))}
           <Link
             to="/ai"
-            onClick={() => setOpen(false)}
-            className="rounded-lg px-3 py-3 font-display text-2xl font-semibold tracking-tight hover:bg-accent"
+            className="ml-2 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
           >
             AI Assistant
           </Link>
-          <Button asChild size="lg" className="mt-4">
-            <Link to={{ pathname: "/", hash: "#contact" }} onClick={() => setOpen(false)}>
-              Start a project
-            </Link>
-          </Button>
         </nav>
+
+        {/* Mobile menu trigger */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Link
+            to="/ai"
+            className="rounded-lg border border-border px-2.5 py-1 text-xs font-semibold text-muted-foreground"
+          >
+            AI
+          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+            className="h-10 w-10 text-foreground"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Thin coral page progress line (Behavior #6) */}
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-border/20 overflow-hidden" aria-hidden="true">
+        <div
+          className="h-full bg-signal origin-left transition-transform duration-75 ease-out"
+          style={{ transform: `scaleX(${progress})` }}
+        />
+      </div>
+
+      {/* Mobile drawer */}
+      {open && (
+        <div
+          id="mobile-menu"
+          className="border-b border-border bg-background/95 backdrop-blur-xl px-6 py-6 md:hidden shadow-2xl"
+        >
+          <nav aria-label="Mobile" className="flex flex-col gap-2">
+            {sectionLinks.map((s) => (
+              <Link
+                key={s.id}
+                to={{ pathname: "/", hash: `#${s.id}` }}
+                onClick={() => setOpen(false)}
+                className={`rounded-lg px-3 py-2.5 text-base font-medium transition-colors ${
+                  active === s.id ? "bg-muted text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {s.label}
+              </Link>
+            ))}
+            <Link
+              to="/ai"
+              onClick={() => setOpen(false)}
+              className="mt-2 rounded-lg border border-border px-3 py-2.5 text-center text-sm font-semibold text-foreground hover:border-primary"
+            >
+              Open AI Assistant
+            </Link>
+          </nav>
+        </div>
       )}
     </header>
   );
