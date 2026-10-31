@@ -1,79 +1,65 @@
 import { Video, Music, Gamepad2, Film, Pencil, Sparkles } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 
-const Services = () => {
-  const services = [
-    {
-      icon: Video,
-      title: "Video Editing",
-      description: "Professional post-production workflows for gaming content, vlogs, and creative projects with industry-standard tools.",
-    },
-    {
-      icon: Music,
-      title: "Music Production",
-      description: "Original rap tracks, lo-fi beats, and creative soundscapes that bring your audio vision to life.",
-    },
-    {
-      icon: Gamepad2,
-      title: "Gaming Content",
-      description: "Minecraft builds, gameplay highlights, and entertaining gaming content creation and editing.",
-    },
-    {
-      icon: Film,
-      title: "Digital Storytelling",
-      description: "Combining visual and audio elements to create engaging narratives that captivate your audience.",
-    },
-    {
-      icon: Pencil,
-      title: "Content Creation",
-      description: "End-to-end content creation services from concept development to final delivery.",
-    },
-    {
-      icon: Sparkles,
-      title: "Creative Direction",
-      description: "Strategic creative guidance to ensure your projects achieve maximum impact and engagement.",
-    },
-  ];
+const services = [
+  {
+    icon: Video,
+    title: "Video editing",
+    description:
+      "Post-production for gaming content, vlogs and creative projects: cuts, pacing, color, sound and final export.",
+  },
+  {
+    icon: Music,
+    title: "Music production",
+    description: "Original rap tracks, lo-fi beats and soundscapes, written and produced to fit your project.",
+  },
+  {
+    icon: Gamepad2,
+    title: "Gaming content",
+    description: "Minecraft builds, gameplay highlights and finished gaming videos, filmed and edited.",
+  },
+  {
+    icon: Film,
+    title: "Digital storytelling",
+    description: "Visuals and audio shaped into a narrative that holds attention from the first second.",
+  },
+  {
+    icon: Pencil,
+    title: "Content creation",
+    description: "End-to-end production: concept, shoot or build, edit and delivery in one workflow.",
+  },
+  {
+    icon: Sparkles,
+    title: "Creative direction",
+    description: "Guidance on look, sound and structure so your project lands the way you picture it.",
+  },
+];
 
-  return (
-    <section id="services" className="py-12 sm:py-24 relative">
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="text-center mb-10 sm:mb-16 animate-fade-in">
-          <div className="inline-block px-4 sm:px-6 py-2 sm:py-3 glass rounded-full mb-4 sm:mb-6 hover-scale transition-all duration-300">
-            <span className="text-xs sm:text-sm font-medium gradient-text">What We Offer</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 animate-scale-in">
-            Our <span className="gradient-text">Services</span>
-          </h2>
-          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Comprehensive creative solutions tailored to your unique vision and goals
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-          {services.map((service, index) => (
-            <Card
-              key={service.title}
-              className="glass border-primary/20 depth-card group animate-scale-in hover-scale transition-all duration-300"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <CardContent className="p-5 sm:p-8">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-4 sm:mb-6 glow group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                  <service.icon className="w-6 h-6 sm:w-7 sm:h-7 text-background" />
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 group-hover:gradient-text transition-all duration-300">
-                  {service.title}
-                </h3>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  {service.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+const Services = () => (
+  <section id="services" className="section-y border-t border-border">
+    <div className="wrap">
+      <div className="max-w-2xl">
+        <h2 className="heading-lg">What we make</h2>
+        <p className="lead mt-4">Six ways to work with the studio, from a single edit to a full production.</p>
       </div>
-    </section>
-  );
-};
+
+      <ul className="mt-12 border-t border-border sm:mt-16">
+        {services.map((s) => (
+          <li
+            key={s.title}
+            className="grid gap-3 border-b border-border py-7 transition-colors hover:bg-card/60 sm:grid-cols-12 sm:gap-8 sm:px-4 sm:py-8"
+          >
+            <div className="flex items-center gap-4 sm:col-span-5">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-primary-foreground">
+                <s.icon className="h-5 w-5 text-lane-video" aria-hidden="true" />
+              </span>
+              <h3 className="text-xl font-bold tracking-tight sm:text-2xl">{s.title}</h3>
+            </div>
+            <p className="text-base leading-relaxed text-muted-foreground sm:col-span-7 sm:pt-1.5">{s.description}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+);
 
 export default Services;

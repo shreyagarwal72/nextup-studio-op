@@ -9,7 +9,19 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    const raw = Array.isArray(body?.messages) ? body.messages : [];
+    // Only forward user/assistant text, capped in count and length.
+    const messages = raw
+      .filter((m: any) => (m?.role === "user" || m?.role === "assistant") && typeof m?.content === "string")
+      .slice(-20)
+      .map((m: any) => ({ role: m.role, content: m.content.slice(0, 2000) }));
+    if (messages.length === 0) {
+      return new Response(JSON.stringify({ error: "No messages provided" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 

@@ -1,197 +1,187 @@
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send, Instagram, Youtube, Github } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Instagram, Youtube, Github, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import emailjs from "@emailjs/browser";
 
+// EmailJS public identifiers (safe to ship in the browser).
+const EMAILJS_SERVICE = "service_0tz9fru";
+const EMAILJS_TEMPLATE = "template_b90a212";
+const EMAILJS_PUBLIC_KEY = "KRsxH4cZ_5RJ2EMJB";
+
+const contactInfo = [
+  { icon: Mail, label: "Email", value: "sanjayvansu1973@gmail.com", href: "mailto:sanjayvansu1973@gmail.com" },
+  { icon: Phone, label: "Phone", value: "+91 9412104618", href: "tel:+919412104618" },
+  {
+    icon: MapPin,
+    label: "Location",
+    value: "Agra, Uttar Pradesh, India",
+    href: "https://maps.google.com/?q=Agra,India",
+    external: true,
+  },
+];
+
+const socialLinks = [
+  { icon: Youtube, href: "https://www.youtube.com/@nextupstudioyt", label: "YouTube" },
+  { icon: Instagram, href: "https://instagram.com/vanshu_ag_72", label: "Instagram" },
+  { icon: Github, href: "https://github.com/shreyagarwal72", label: "GitHub" },
+];
+
+const empty = { name: "", email: "", subject: "", message: "", company: "" };
+
 const Contact = () => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState(empty);
+  const [sending, setSending] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    if (sending) return;
+
+    // Honeypot: real people never see or fill this field.
+    if (formData.company) {
+      setFormData(empty);
+      return;
+    }
+
+    setSending(true);
     try {
       await emailjs.send(
-        'service_0tz9fru',
-        'template_b90a212',
+        EMAILJS_SERVICE,
+        EMAILJS_TEMPLATE,
         {
-          from_name: formData.name,
-          from_email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
+          from_name: formData.name.trim(),
+          from_email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
         },
-        'KRsxH4cZ_5RJ2EMJB'
+        EMAILJS_PUBLIC_KEY,
       );
-      
+      toast({ title: "Message sent", description: "Thanks for reaching out. We'll reply as soon as we can." });
+      setFormData(empty);
+    } catch {
       toast({
-        title: "Message sent successfully!",
-        description: "We'll get back to you as soon as possible.",
-      });
-      
-      setFormData({ name: "", email: "", subject: "", message: "" });
-    } catch (error) {
-      toast({
-        title: "Failed to send message",
-        description: "Please try again or contact us directly via email.",
+        title: "Message not sent",
+        description: "Check your connection and try again, or email us directly.",
         variant: "destructive",
       });
+    } finally {
+      setSending(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const contactInfo = [
-    {
-      icon: Mail,
-      label: "Email",
-      value: "sanjayvansu1973@gmail.com",
-      href: "mailto:sanjayvansu1973@gmail.com",
-    },
-    {
-      icon: Phone,
-      label: "Phone",
-      value: "+91 9412104618",
-      href: "tel:+919412104618",
-    },
-    {
-      icon: MapPin,
-      label: "Location",
-      value: "Agra, Uttar Pradesh, India",
-      href: "https://maps.google.com/?q=Agra,India",
-    },
-  ];
-
-  const socialLinks = [
-    { icon: Youtube, href: "https://www.youtube.com/@nextupstudioyt", label: "YouTube" },
-    { icon: Instagram, href: "https://instagram.com/vanshu_ag_72", label: "Instagram" },
-    { icon: Github, href: "https://github.com/shreyagarwal72", label: "GitHub" },
-  ];
-
   return (
-    <section id="contact" className="py-12 sm:py-24 relative">
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="text-center mb-10 sm:mb-16 animate-fade-in">
-          <div className="inline-block px-4 sm:px-6 py-2 sm:py-3 glass rounded-full mb-4 sm:mb-6 hover-scale transition-all duration-300">
-            <span className="text-xs sm:text-sm font-medium gradient-text">Get In Touch</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 animate-scale-in">
-            Let's Create <span className="gradient-text">Together</span>
-          </h2>
-          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Have a project in mind? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+    <section id="contact" className="section-y border-t border-border">
+      <div className="wrap grid gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-5">
+          <h2 className="heading-lg">Start a project</h2>
+          <p className="lead mt-4">
+            Tell us what you're making. We'll reply with questions, a timeline and a price.
           </p>
-        </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 sm:gap-12 max-w-6xl mx-auto">
-          {/* Contact Form */}
-          <div className="glass rounded-2xl sm:rounded-3xl p-5 sm:p-8 depth-card animate-slide-in hover-scale transition-all duration-300">
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <div>
-                <Input
-                  name="name"
-                  placeholder="Your Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-5 sm:py-6 text-sm sm:text-base"
-                />
-              </div>
-              <div>
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="Your Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-5 sm:py-6 text-sm sm:text-base"
-                />
-              </div>
-              <div>
-                <Input
-                  name="subject"
-                  placeholder="Subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  className="glass border-primary/30 focus:border-primary transition-all duration-300 py-5 sm:py-6 text-sm sm:text-base"
-                />
-              </div>
-              <div>
-                <Textarea
-                  name="message"
-                  placeholder="Your Message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={5}
-                  className="glass border-primary/30 focus:border-primary resize-none transition-all duration-300 text-sm sm:text-base"
-                />
-              </div>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover-scale glow group transition-all duration-300 py-6"
-              >
-                Send Message
-                <Send className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </form>
-          </div>
+          <ul className="mt-10 divide-y divide-border border-y border-border">
+            {contactInfo.map((item) => (
+              <li key={item.label}>
+                <a
+                  href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
+                  className="group flex items-center gap-4 py-4 transition-colors hover:text-primary-foreground"
+                >
+                  <item.icon className="h-5 w-5 shrink-0 text-lane-music" aria-hidden="true" />
+                  <span className="min-w-0">
+                    <span className="block text-xs text-muted-foreground">{item.label}</span>
+                    <span className="block break-words text-base font-medium group-hover:underline">{item.value}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
 
-          {/* Contact Info */}
-          <div className="space-y-4 sm:space-y-8 animate-slide-in" style={{ animationDelay: "0.2s" }}>
-            {contactInfo.map((item, index) => (
+          <div className="mt-6 flex gap-3">
+            {socialLinks.map((s) => (
               <a
-                key={item.label}
-                href={item.href}
-                target={item.label === "Location" ? "_blank" : undefined}
-                rel={item.label === "Location" ? "noopener noreferrer" : undefined}
-                className="glass rounded-xl sm:rounded-2xl p-4 sm:p-6 flex items-start gap-4 depth-card group hover-scale transition-all duration-300 animate-fade-in"
-                style={{ animationDelay: `${0.1 * index + 0.2}s` }}
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${s.label} (opens in a new tab)`}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-border text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
               >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center glow group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                  <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-background" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-sm text-muted-foreground mb-1">{item.label}</div>
-                  <div className="text-sm sm:text-base font-medium break-all group-hover:gradient-text transition-all duration-300">
-                    {item.value}
-                  </div>
-                </div>
+                <s.icon className="h-5 w-5" aria-hidden="true" />
               </a>
             ))}
-
-            {/* Social Links */}
-            <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-6 animate-fade-in hover-scale transition-all duration-300" style={{ animationDelay: "0.5s" }}>
-              <h3 className="font-bold mb-3 sm:mb-4 text-sm sm:text-base">Follow Us</h3>
-              <div className="flex gap-3 sm:gap-4">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl glass border-primary/30 hover:border-primary flex items-center justify-center group transition-all duration-300 hover:glow hover-scale"
-                    aria-label={social.label}
-                  >
-                    <social.icon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-                  </a>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="relative rounded-2xl border border-border bg-card p-5 sm:p-8 lg:col-span-7"
+          aria-busy={sending}
+        >
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" name="name" autoComplete="name" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-2">
+            <Label htmlFor="subject">What's it about?</Label>
+            <Input id="subject" name="subject" value={formData.subject} onChange={handleChange} required />
+          </div>
+
+          <div className="mt-5 space-y-2">
+            <Label htmlFor="message">Message</Label>
+            <Textarea
+              id="message"
+              name="message"
+              rows={6}
+              value={formData.message}
+              onChange={handleChange}
+              required
+              className="resize-y"
+            />
+          </div>
+
+          {/* Honeypot */}
+          <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+            <label htmlFor="company">Company</label>
+            <input
+              id="company"
+              name="company"
+              tabIndex={-1}
+              autoComplete="off"
+              value={formData.company}
+              onChange={handleChange}
+            />
+          </div>
+
+          <Button type="submit" size="lg" className="mt-6 w-full sm:w-auto" disabled={sending}>
+            {sending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Send aria-hidden="true" />}
+            {sending ? "Sending…" : "Send message"}
+          </Button>
+        </form>
       </div>
     </section>
   );

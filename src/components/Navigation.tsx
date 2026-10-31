@@ -1,192 +1,153 @@
-import { useState, useEffect } from "react";
-import { Menu, X, MapPin, Calendar, MessageSquare, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const sectionLinks = [
+  { id: "about", label: "About" },
+  { id: "services", label: "Services" },
+  { id: "portfolio", label: "Work" },
+  { id: "contact", label: "Contact" },
+];
 
 const Navigation = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
-  const isAIPage = location.pathname === "/ai";
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<string>("");
 
+  // Background once the page scrolls.
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navLinks = [
-    { href: "#about", label: "About" },
-    { href: "#services", label: "Services" },
-    { href: "#portfolio", label: "Portfolio" },
-    { href: "#contact", label: "Contact" },
-  ];
-
-  const utilityLinks = [
-    { href: "#portfolio", label: "Projects", icon: MapPin },
-    { href: "#services", label: "Services", icon: Calendar },
-    { href: "#contact", label: "Contact", icon: MessageSquare },
-    { href: "#contact", label: "Join Us", icon: UserPlus },
-  ];
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    setIsMobileMenuOpen(false);
-    if (href.startsWith("#")) {
-      if (isAIPage) return;
-      e.preventDefault();
-      const targetId = href.replace("#", "");
-      if (targetId === "home") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-      const targetElem = document.getElementById(targetId);
-      if (targetElem) {
-        const navOffset = 70;
-        const elementPosition = targetElem.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth",
-        });
-      }
+  // Highlight the section currently under the nav (home page only).
+  useEffect(() => {
+    if (!isHome) {
+      setActive("");
+      return;
     }
-  };
+    const update = () => {
+      let current = "";
+      for (const { id } of sectionLinks) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 140) current = id;
+      }
+      setActive(current);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [isHome]);
+
+  // Close the mobile menu on navigation, Escape, or when growing to desktop width.
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onMq = () => mq.matches && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    mq.addEventListener("change", onMq);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      mq.removeEventListener("change", onMq);
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  const linkBase =
+    "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground aria-[current]:text-foreground";
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "glass border-b border-border/50 bg-background/80 backdrop-blur-xl" : "bg-transparent"
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ${
+        scrolled || open
+          ? "border-b border-border bg-background/90 backdrop-blur-md"
+          : "border-b border-transparent bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6">
-        {/* Top utility bar */}
-        <div className="hidden lg:flex items-center justify-end gap-8 py-3 border-b border-border/30">
-          {utilityLinks.map((link) => (
-            <a
-              key={link.label}
-              href={isAIPage ? `/${link.href}` : link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <link.icon size={16} />
-              <span>{link.label}</span>
-            </a>
-          ))}
-        </div>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
 
-        {/* Main navigation */}
-        <div className="flex items-center justify-between py-4 sm:py-6">
-          <a href={isAIPage ? "/#home" : "#home"} onClick={(e) => handleNavClick(e, "#home")} className="flex items-center space-x-3 group">
-            <div className="text-xl sm:text-2xl font-bold tracking-tighter">
-              <span className="text-foreground">NEXTUP</span>
-              <div className="text-[10px] sm:text-xs text-muted-foreground tracking-widest">STUDIO</div>
-            </div>
-          </a>
+      <div className="wrap flex h-16 items-center justify-between">
+        <Link to="/" className="flex items-baseline gap-2" aria-label="Nextup Studio home">
+          <span className="font-display text-xl font-extrabold tracking-tight">Nextup</span>
+          <span className="font-display text-xl font-medium tracking-tight text-muted-foreground">Studio</span>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8 lg:space-x-12">
-            {!isAIPage && (
-              <>
-                <a href="#home" onClick={(e) => handleNavClick(e, "#home")} className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide">
-                  Home
-                </a>
-                {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </>
-            )}
-            {isAIPage && (
-              <Link to="/" className="text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide">
-                Home
-              </Link>
-            )}
-            <Link 
-              to="/ai" 
-              className={`text-foreground hover:text-muted-foreground transition-colors text-sm tracking-wide ${isAIPage ? 'gradient-text font-medium' : ''}`}
+        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+          {sectionLinks.map((l) => (
+            <Link
+              key={l.id}
+              to={{ pathname: "/", hash: `#${l.id}` }}
+              aria-current={isHome && active === l.id ? "location" : undefined}
+              className={linkBase}
             >
-              AI Assistant
+              {l.label}
             </Link>
-          </div>
+          ))}
+          <Link to="/ai" aria-current={pathname === "/ai" ? "page" : undefined} className={linkBase}>
+            AI Assistant
+          </Link>
+          <Button asChild size="sm" className="ml-3">
+            <Link to={{ pathname: "/", hash: "#contact" }}>Start a project</Link>
+          </Button>
+        </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-foreground p-2 rounded-lg hover:bg-white/5 transition-colors"
-            aria-label="Toggle Menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-accent md:hidden"
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+        >
+          {open ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden glass border-t border-border/50 animate-fade-in fixed inset-x-0 top-full max-h-[calc(100vh-80px)] overflow-y-auto shadow-2xl backdrop-blur-2xl bg-background/95">
-          <div className="container mx-auto px-6 py-6 flex flex-col space-y-4">
-            {!isAIPage && (
-              <>
-                <a
-                  href="#home"
-                  onClick={(e) => handleNavClick(e, "#home")}
-                  className="text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium"
-                >
-                  Home
-                </a>
-                {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className="text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </>
-            )}
-            {isAIPage && (
-              <Link 
-                to="/" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium"
-              >
-                Home
-              </Link>
-            )}
+      {open && (
+        <nav
+          id="mobile-menu"
+          aria-label="Mobile"
+          className="wrap flex max-h-[calc(100svh-4rem)] flex-col gap-1 overflow-y-auto pb-6 pt-2 md:hidden"
+        >
+          {sectionLinks.map((l) => (
             <Link
-              to="/ai"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`text-foreground hover:text-muted-foreground transition-colors py-2 text-lg font-medium ${isAIPage ? 'gradient-text font-semibold' : ''}`}
+              key={l.id}
+              to={{ pathname: "/", hash: `#${l.id}` }}
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-3 font-display text-2xl font-semibold tracking-tight hover:bg-accent"
             >
-              AI Assistant
+              {l.label}
             </Link>
-            {!isAIPage && (
-              <div className="pt-4 border-t border-border/30 space-y-2">
-                {utilityLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors py-2 text-sm"
-                  >
-                    <link.icon size={18} />
-                    <span>{link.label}</span>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+          ))}
+          <Link
+            to="/ai"
+            onClick={() => setOpen(false)}
+            className="rounded-lg px-3 py-3 font-display text-2xl font-semibold tracking-tight hover:bg-accent"
+          >
+            AI Assistant
+          </Link>
+          <Button asChild size="lg" className="mt-4">
+            <Link to={{ pathname: "/", hash: "#contact" }} onClick={() => setOpen(false)}>
+              Start a project
+            </Link>
+          </Button>
+        </nav>
       )}
-    </nav>
+    </header>
   );
 };
 

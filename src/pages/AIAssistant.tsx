@@ -1,279 +1,361 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Bot, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowUp, Square, Trash2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
+const suggestedQuestions = [
+  "What services does Nextup Studio offer?",
+  "Tell me about Vanshu's portfolio projects",
+  "What are Vanshu's video editing skills?",
+  "How can I contact Nextup Studio?",
+  "Tell me about the music projects",
+  "What gaming content does Nextup Studio create?",
+];
+
+/* ---------- Tiny, safe markdown renderer (no innerHTML) ---------- */
+const inline = (text: string, keyPrefix: string) =>
+  text.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*|`[^`]+`)/g).map((part, i) => {
+    const key = `${keyPrefix}-${i}`;
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4)
+      return <strong key={key} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+    if (part.startsWith("`") && part.endsWith("`") && part.length > 2)
+      return <code key={key} className="rounded bg-muted px-1.5 py-0.5 text-[0.9em]">{part.slice(1, -1)}</code>;
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) return <em key={key}>{part.slice(1, -1)}</em>;
+    return part;
+  });
+
+const renderMarkdown = (content: string) => {
+  const blocks: JSX.Element[] = [];
+  const lines = content.split("\n");
+  let list: { ordered: boolean; items: string[] } | null = null;
+  let para: string[] = [];
+
+  const flushPara = () => {
+    if (para.length) {
+      blocks.push(<p key={`p${blocks.length}`}>{inline(para.join(" "), `p${blocks.length}`)}</p>);
+      para = [];
+    }
+  };
+  const flushList = () => {
+    if (list) {
+      const Tag = list.ordered ? "ol" : "ul";
+      const idx = blocks.length;
+      blocks.push(
+        <Tag key={`l${idx}`} className={`space-y-1 pl-5 ${list.ordered ? "list-decimal" : "list-disc"}`}>
+          {list.items.map((it, i) => <li key={i}>{inline(it, `l${idx}-${i}`)}</li>)}
+        </Tag>,
+      );
+      list = null;
+    }
+  };
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    const bullet = line.match(/^\s*[-*•]\s+(.*)$/);
+    const numbered = line.match(/^\s*\d+[.)]\s+(.*)$/);
+    if (bullet || numbered) {
+      flushPara();
+      const ordered = !!numbered;
+      if (!list || list.ordered !== ordered) {
+        flushList();
+        list = { ordered, items: [] };
+      }
+      list.items.push((bullet ?? numbered)![1]);
+    } else if (line.trim() === "") {
+      flushPara();
+      flushList();
+    } else {
+      flushList();
+      para.push(line.trim());
+    }
+  }
+  flushPara();
+  flushList();
+  return <div className="space-y-3">{blocks}</div>;
+};
+
 const AIAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
-
-  const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
-
-  const suggestedQuestions = [
-    "What services does Nextup Studio offer?",
-    "Tell me about Vanshu's portfolio projects",
-    "What are Vanshu's video editing skills?",
-    "How can I contact Nextup Studio?",
-    "Tell me about the music projects",
-    "What gaming content does Nextup Studio create?",
-  ];
+  const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const lastPromptRef = useRef<string>("");
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    document.title = "AI Assistant — Nextup Studio";
+    return () => abortRef.current?.abort();
+  }, []);
 
-  const streamChat = async (userMessage: Message) => {
-    try {
-      const resp = await fetch(CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
-      });
+  // Scroll only the chat panel (scrollIntoView would drag the whole page).
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [messages, isLoading]);
 
-      if (!resp.ok) {
-        if (resp.status === 429) {
-          toast({
-            title: "Rate limit exceeded",
-            description: "Please try again in a moment.",
-            variant: "destructive",
-          });
-          return;
-        }
-        if (resp.status === 402) {
-          toast({
-            title: "Service unavailable",
-            description: "AI service requires payment. Please contact support.",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw new Error("Failed to start stream");
-      }
+  // Grow the textarea with its content.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, [input]);
 
-      if (!resp.body) throw new Error("No response body");
+  const send = useCallback(
+    async (text: string, history: Message[]) => {
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setIsLoading(true);
+      setError(null);
+      lastPromptRef.current = text;
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-      let streamDone = false;
+      const payload: Message[] = [...history, { role: "user", content: text }];
       let assistantContent = "";
 
-      while (!streamDone) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
+      const updateAssistant = (content: string) =>
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant") return [...prev.slice(0, -1), { role: "assistant", content }];
+          return [...prev, { role: "assistant", content }];
+        });
 
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
+      try {
+        const resp = await fetch(CHAT_URL, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ messages: payload }),
+        });
 
+        if (!resp.ok) {
+          if (resp.status === 429) throw new Error("Too many requests right now. Wait a moment and try again.");
+          if (resp.status === 402) throw new Error("The AI service is unavailable at the moment. Please email us instead.");
+          throw new Error("The assistant couldn't answer. Please try again.");
+        }
+        if (!resp.body) throw new Error("The assistant sent an empty response. Please try again.");
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let finished = false;
+
+        const handleLine = (line: string) => {
           if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") {
-            streamDone = true;
-            break;
+          if (!line.startsWith("data: ")) return;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") {
+            finished = true;
+            return;
           }
-
           try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              assistantContent += content;
-              setMessages((prev) => {
-                const lastMsg = prev[prev.length - 1];
-                if (lastMsg?.role === "assistant") {
-                  return prev.map((m, i) =>
-                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
-                  );
-                }
-                return [...prev, { role: "assistant", content: assistantContent }];
-              });
+            const delta = JSON.parse(json).choices?.[0]?.delta?.content as string | undefined;
+            if (delta) {
+              assistantContent += delta;
+              updateAssistant(assistantContent);
             }
           } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
+            /* partial JSON — ignored, the next chunk completes the stream */
+          }
+        };
+
+        while (!finished) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let nl: number;
+          while ((nl = buffer.indexOf("\n")) !== -1 && !finished) {
+            handleLine(buffer.slice(0, nl));
+            buffer = buffer.slice(nl + 1);
           }
         }
+        if (buffer.trim() && !finished) handleLine(buffer);
+
+        if (!assistantContent) throw new Error("The assistant didn't return an answer. Please try again.");
+      } catch (e) {
+        if ((e as Error).name === "AbortError") return; // user pressed Stop
+        setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      } finally {
+        setIsLoading(false);
+        abortRef.current = null;
       }
-    } catch (error) {
-      console.error("Chat error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+    },
+    [],
+  );
+
+  const submit = (raw: string) => {
+    const text = raw.trim();
+    if (!text || isLoading) return;
+    const history = messages;
+    setMessages([...history, { role: "user", content: text }]);
+    setInput("");
+    void send(text, history);
+    inputRef.current?.focus();
+  };
+
+  const retry = () => {
+    // The failed prompt is already the last message; resend it with the earlier history.
+    const history = messages.slice(0, -1);
+    void send(lastPromptRef.current, history);
+  };
+
+  const stop = () => abortRef.current?.abort();
+
+  const clearChat = () => {
+    abortRef.current?.abort();
+    setMessages([]);
+    setError(null);
+    setInput("");
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      submit(input);
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = { role: "user", content: input.trim() };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    await streamChat(userMessage);
-  };
-
-  const handleSuggestedQuestion = (question: string) => {
-    setInput(question);
-  };
-
-  const clearChat = () => {
-    setMessages([]);
-    toast({
-      title: "Chat cleared",
-      description: "Conversation history has been reset.",
-    });
-  };
-
-  const renderFormattedContent = (content: string) => {
-    const lines = content.split("\n");
-    return lines.map((line, lineIdx) => {
-      const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
-      return (
-        <span key={lineIdx}>
-          {parts.map((part, index) => {
-            if ((part.startsWith("**") && part.endsWith("**")) || (part.startsWith("*") && part.endsWith("*"))) {
-              const cleanText = part.replace(/^\*+|\*+$/g, "");
-              return (
-                <strong key={index} className="font-bold text-foreground">
-                  {cleanText}
-                </strong>
-              );
-            }
-            return part;
-          })}
-          {lineIdx < lines.length - 1 && <br />}
-        </span>
-      );
-    });
-  };
+  const showTyping = isLoading && messages[messages.length - 1]?.role === "user";
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-svh flex-col">
       <Navigation />
-      
-      <main className="flex-1 container mx-auto px-4 sm:px-6 py-20 sm:py-24">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 glass rounded-full mb-4 sm:mb-6 hover-scale">
-              <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-pulse" />
-              <span className="text-xs sm:text-sm font-medium gradient-text">AI Assistant</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 animate-scale-in">
-              Nextup Studio <span className="gradient-text">AI</span>
-            </h1>
-            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Hi! I'm your AI assistant. I can help you learn about Nextup Studio's work, skills, and projects. What would you like to know?
-            </p>
-          </div>
 
-          {messages.length === 0 && (
-            <div className="mb-6 sm:mb-8 animate-fade-in">
-              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-3 sm:mb-4 tracking-wide">Suggested Questions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
-                {suggestedQuestions.map((question, i) => (
-                  <Button
-                    key={i}
-                    variant="outline"
-                    className="glass border-primary/20 hover:bg-primary/10 hover-scale justify-start text-left h-auto py-3 sm:py-4 px-4 sm:px-5 transition-all duration-300"
-                    onClick={() => handleSuggestedQuestion(question)}
-                    style={{ animationDelay: `${i * 0.1}s` }}
-                  >
-                    <span className="text-xs sm:text-sm">{question}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
+      <main id="main" className="wrap flex-1 pb-12 pt-28 sm:pt-32">
+        <div className="max-w-3xl">
+          <h1 className="heading-lg">Ask the studio</h1>
+          <p className="lead mt-4">
+            An AI assistant that can answer questions about Nextup Studio's services, projects and how to get in touch.
+          </p>
+        </div>
 
-          <div className="relative mb-4 sm:mb-6">
-            {messages.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearChat}
-                className="absolute -top-10 sm:-top-12 right-0 text-xs sm:text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
-              >
-                <Trash2 className="w-4 h-4 mr-1 sm:mr-2" />
-                Clear Chat
-              </Button>
-            )}
-            <Card className="glass border-primary/20 p-4 sm:p-6 min-h-[350px] sm:min-h-[400px] max-h-[500px] sm:max-h-[600px] overflow-y-auto backdrop-blur-xl">
-              <div className="space-y-4 sm:space-y-6">
-                {messages.map((msg, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-scale-in`}
-                    style={{ animationDelay: `${i * 0.05}s` }}
-                  >
-                    <div
-                      className={`max-w-[90%] sm:max-w-[85%] rounded-2xl px-4 sm:px-5 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl ${
-                        msg.role === "user"
-                          ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground"
-                          : "glass border border-primary/30"
-                      }`}
-                    >
-                      <p className={`text-xs sm:text-sm leading-relaxed ${msg.role === "assistant" ? "font-normal" : ""}`}>
-                        {renderFormattedContent(msg.content)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="flex justify-start animate-scale-in">
-                    <div className="glass border border-primary/30 rounded-2xl px-4 sm:px-5 py-3 sm:py-4">
-                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-primary" />
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </Card>
-          </div>
-
-          <div className="flex gap-2 sm:gap-3">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask me anything..."
-              className="glass border-primary/30 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 py-5 sm:py-6 text-xs sm:text-sm"
-              disabled={isLoading}
-            />
+        <div className="mt-8 flex max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-card sm:mt-10">
+          <div className="flex items-center justify-between border-b border-border px-4 py-2.5 sm:px-5">
+            <p className="text-sm font-medium text-muted-foreground">Conversation</p>
             <Button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 hover-scale px-4 sm:px-6 py-5 sm:py-6 transition-all duration-300 shrink-0"
+              variant="ghost"
+              size="sm"
+              onClick={clearChat}
+              disabled={messages.length === 0 && !input}
+              className="text-muted-foreground hover:text-foreground"
             >
-              {isLoading ? <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" /> : <Send className="w-4 h-4 sm:w-5 sm:h-5" />}
+              <Trash2 aria-hidden="true" />
+              Clear
             </Button>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground mt-6 animate-fade-in">
-            Powered by <span className="gradient-text font-medium">Lovable AI</span> • Free Gemini models
-          </p>
+          <div
+            ref={scrollRef}
+            role="log"
+            aria-live="polite"
+            aria-label="Conversation with the Nextup Studio assistant"
+            className="h-[52svh] min-h-[320px] overflow-y-auto overscroll-contain px-4 py-5 sm:px-5"
+          >
+            {messages.length === 0 ? (
+              <div>
+                <p className="text-sm text-muted-foreground">Pick a question or write your own.</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {suggestedQuestions.map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => submit(q)}
+                      className="rounded-full border border-border bg-background/40 px-4 py-2 text-left text-sm transition-colors hover:border-primary hover:bg-accent"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ul className="space-y-4">
+                {messages.map((m, i) => (
+                  <li key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[88%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed sm:max-w-[80%] ${
+                        m.role === "user"
+                          ? "rounded-br-md bg-primary text-primary-foreground"
+                          : "rounded-bl-md border border-border bg-background/50 text-muted-foreground"
+                      }`}
+                    >
+                      {m.role === "user" ? <p className="whitespace-pre-wrap break-words">{m.content}</p> : renderMarkdown(m.content)}
+                    </div>
+                  </li>
+                ))}
+                {showTyping && (
+                  <li className="flex justify-start" aria-label="Assistant is typing">
+                    <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-border bg-background/50 px-4 py-4">
+                      {[0, 1, 2].map((d) => (
+                        <span
+                          key={d}
+                          className="h-1.5 w-1.5 animate-dot-bounce rounded-full bg-muted-foreground"
+                          style={{ animationDelay: `${d * 0.15}s` }}
+                        />
+                      ))}
+                    </div>
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-destructive/10 px-4 py-3 text-sm sm:px-5"
+            >
+              <span>{error}</span>
+              <Button size="sm" variant="outline" onClick={retry}>
+                <RotateCcw aria-hidden="true" />
+                Try again
+              </Button>
+            </div>
+          )}
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit(input);
+            }}
+            className="flex items-end gap-2 border-t border-border p-3 sm:p-4"
+          >
+            <label htmlFor="chat-input" className="sr-only">
+              Your question
+            </label>
+            <textarea
+              id="chat-input"
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKeyDown}
+              rows={1}
+              placeholder="Ask about services, projects or contact…"
+              className="max-h-40 min-h-11 flex-1 resize-none rounded-lg border border-input bg-background/60 px-4 py-2.5 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            {isLoading ? (
+              <Button type="button" size="icon" variant="outline" onClick={stop} aria-label="Stop answering">
+                <Square aria-hidden="true" className="fill-current" />
+              </Button>
+            ) : (
+              <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send question">
+                <ArrowUp aria-hidden="true" />
+              </Button>
+            )}
+          </form>
         </div>
+
+        <p className="mt-4 max-w-3xl text-xs text-muted-foreground">
+          Answers come from an AI and can be wrong. For quotes or timelines, send a message through the contact form.
+        </p>
       </main>
 
       <Footer />
